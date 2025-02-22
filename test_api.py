@@ -3,12 +3,15 @@ import requests
 import mido
 import time
 import json
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # 🎹 Set up MIDI output
 MIDI_PORT = "loopMIDI Port 1 1"  # Adjust if needed
 midi_out = mido.open_output(MIDI_PORT)
+print(mido.get_output_names())
 
 # 🔑 Google Gemini API Key (Replace with your actual key)
 API_KEY = "AIzaSyBzRisNmv2lm0nw1fj4Kml_t-2V_KIQtn0"  # Replace with your actual API key
@@ -96,7 +99,7 @@ def generate_midi():
                 cc_number = MIDI_CC_PARAMS.get(param)
                 if cc_number is not None:
                     send_cc(cc_number, cc_value)
-            return jsonify({"message": "MIDI automation complete!", "values": midi_values})
+            return jsonify({"message": "MIDI automation complete!"})
         except json.JSONDecodeError:
             return jsonify({"error": "Failed to parse LLM response as JSON."}), 400
     

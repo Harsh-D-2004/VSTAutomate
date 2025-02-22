@@ -1,2 +1,6 @@
 venv/Lib/site-packages/certifi-2025.1.31.dist-info/INSTALLER
 /venv
+
+apiKey.py
+./apiKey.py
+__pycache__/apiKey.cpython-312.pyc

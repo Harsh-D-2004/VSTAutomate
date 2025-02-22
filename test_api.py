@@ -3,13 +3,13 @@ import requests
 import mido
 import time
 import json
-from flask_cors import CORS
+
 app = Flask(__name__)
-CORS(app, resources={r"/generate": {"origins": "*"}}, supports_credentials=True)
+
 # 🎹 Set up MIDI output
 MIDI_PORT = "loopMIDI Port 1 1"  # Adjust if needed
 midi_out = mido.open_output(MIDI_PORT)
-print("midi output:",mido.get_output_names())
+
 # 🔑 Google Gemini API Key (Replace with your actual key)
 API_KEY = "AIzaSyBzRisNmv2lm0nw1fj4Kml_t-2V_KIQtn0"  # Replace with your actual API key
 URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
@@ -23,6 +23,19 @@ MIDI_CC_PARAMS = {
 
 # Store last MIDI values
 display_values = {}
+
+PRESET_MAPPING = {
+    "CH Chordionator II FN.noisemakerpreset": 0,
+    "Trance": 1,
+    "Lo-Fi": 2,
+    "Hardstyle": 3,
+    "Techno": 4,
+}
+
+def change_preset(preset_number):
+    msg = mido.Message('program_change', program=preset_number)
+    midi_out.send(msg)
+    print(f"🎛️ Switched to preset #{preset_number}")
 
 # 🎵 Function to send a MIDI Control Change (CC) message
 def send_cc(control, value):
@@ -40,6 +53,10 @@ def send_cc(control, value):
     for key, cc_num in MIDI_CC_PARAMS.items():
         if cc_num == control:
             display_values[key] = value
+
+    # preset_number = PRESET_MAPPING["CH Chordionator II FN.noisemakerpreset"]
+
+    # change_preset(preset_number)
     
     # Play the note
     midi_out.send(mido.Message('note_on', note=NOTE, velocity=VELOCITY))
@@ -96,7 +113,7 @@ def generate_midi():
                 cc_number = MIDI_CC_PARAMS.get(param)
                 if cc_number is not None:
                     send_cc(cc_number, cc_value)
-            return jsonify({"message": "MIDI automation complete!", "values": midi_values})
+            return jsonify({"message": "MIDI automation complete!"})
         except json.JSONDecodeError:
             return jsonify({"error": "Failed to parse LLM response as JSON."}), 400
     

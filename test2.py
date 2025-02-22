@@ -2,14 +2,19 @@ import requests
 import mido
 import time
 import json
+import openai
+from apiKey import OPEN_AI_API_KEY
 
 # 🎹 Set up MIDI output (update with your correct MIDI port name)
-MIDI_PORT = "loopMIDI Port 1 1"  # Adjust if needed
-midi_out = mido.open_output(MIDI_PORT)
+midi_ports = mido.get_output_names()
 
-# 🔑 Google Gemini API Key (Replace with your actual key)
-API_KEY = "AIzaSyBzRisNmv2lm0nw1fj4Kml_t-2V_KIQtn0"  # Replace with your actual API key
-URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+if midi_ports:
+    selected_port = midi_ports[0]  # Use the first available port
+    print(f"Using MIDI port: {selected_port}")
+    midi_out = mido.open_output(selected_port)
+else:
+    print("No MIDI output ports available!")
+    exit()
 
 # 🎛️ MIDI CC Mappings
 MIDI_CC_PARAMS = {
@@ -38,26 +43,34 @@ def send_cc(control, value):
 
     time.sleep(0.5)  # Small delay
 
-# 🧠 Function to get MIDI values from LLM
+# Get API Key
+# import from .apikey
+api_key = OPEN_AI_API_KEY
+
+if not api_key:
+    raise ValueError("API key not found! Add it to .env file.")
+
+# print(api_key)
+
+client = openai.OpenAI(api_key=api_key)
+# Function to send request to Gemini API
 def get_llm_response(prompt):
-    data = {"contents": [{"parts": [{"text": prompt}]}]}
-    headers = {"Content-Type": "application/json"}
-    
     try:
-        response = requests.post(URL, headers=headers, json=data)
-        response.raise_for_status()
-        
-        result = response.json()
-        llm_text = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+        response = client.chat.completions.create(
+            model="gpt-4-turbo",
+            messages=[
+                {"role": "system", "content": "You are an expert in sound design and MIDI automation. "
+                                              "Respond only with a valid JSON object, nothing else."},
+                {"role": "user", "content": prompt}
+            ]
+        )
 
-        # 🛠️ Clean JSON output
-        cleaned_str = llm_text.replace("```json", "").replace("```", "").strip()
-        print("🔄 LLM Response:", cleaned_str)
-
-        return cleaned_str
-    except requests.exceptions.RequestException as e:
-        print(f"❌ API Error: {e}")
+        res = response.choices[0].message.content.strip()
+        return res  # Directly return the response as a string
+    except Exception as e:
+        print("Error generating response:", e)
         return None
+
 
 # 🎶 LLM Prompt
 prompt = "Make it sound like a Martin Garrix-style synth."

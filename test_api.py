@@ -3,13 +3,13 @@ import requests
 import mido
 import time
 import json
-
+from flask_cors import CORS
 app = Flask(__name__)
-
+CORS(app, resources={r"/generate": {"origins": "*"}}, supports_credentials=True)
 # 🎹 Set up MIDI output
 MIDI_PORT = "loopMIDI Port 1 1"  # Adjust if needed
 midi_out = mido.open_output(MIDI_PORT)
-
+print("midi output:",mido.get_output_names())
 # 🔑 Google Gemini API Key (Replace with your actual key)
 API_KEY = "AIzaSyBzRisNmv2lm0nw1fj4Kml_t-2V_KIQtn0"  # Replace with your actual API key
 URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"

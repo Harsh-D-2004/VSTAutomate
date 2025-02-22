@@ -12,16 +12,17 @@ app = Flask(__name__)
 midi_ports = mido.get_output_names()
 
 if midi_ports:
-    selected_port = midi_ports[0]  # Use the first available port
-    print(f"Using MIDI port: {selected_port}")
-    midi_out = mido.open_output(selected_port)
+    # selected_port = midi_ports[0]  # Use the first available port
+    # print(f"Using MIDI port: {selected_port}")
+    midi_out = mido.open_output("loopMIDI Port 1 1")
 else:
     print("No MIDI output ports available!")
     exit()
 
-# 🔑 Google Gemini API Key (Replace with your actual key)
-API_KEY = "AIzaSyBzRisNmv2lm0nw1fj4Kml_t-2V_KIQtn0"  # Replace with your actual API key
-URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+
+# # 🔑 Google Gemini API Key (Replace with your actual key)
+# API_KEY = "AIzaSyBzRisNmv2lm0nw1fj4Kml_t-2V_KIQtn0"  # Replace with your actual API key
+# URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
 
 # 🎛️ MIDI CC Mappings
 MIDI_CC_PARAMS = {

@@ -27,6 +27,19 @@ MIDI_CC_PARAMS = {
 # Store last MIDI values
 display_values = {}
 
+PRESET_MAPPING = {
+    "CH Chordionator II FN.noisemakerpreset": 0,
+    "Trance": 1,
+    "Lo-Fi": 2,
+    "Hardstyle": 3,
+    "Techno": 4,
+}
+
+def change_preset(preset_number):
+    msg = mido.Message('program_change', program=preset_number)
+    midi_out.send(msg)
+    print(f"🎛️ Switched to preset #{preset_number}")
+
 # 🎵 Function to send a MIDI Control Change (CC) message
 def send_cc(control, value):
     global display_values
@@ -43,6 +56,10 @@ def send_cc(control, value):
     for key, cc_num in MIDI_CC_PARAMS.items():
         if cc_num == control:
             display_values[key] = value
+
+    # preset_number = PRESET_MAPPING["CH Chordionator II FN.noisemakerpreset"]
+
+    # change_preset(preset_number)
     
     # Play the note
     midi_out.send(mido.Message('note_on', note=NOTE, velocity=VELOCITY))
